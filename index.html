@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowledge Hub Interview Questions</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-indigo-900 via-indigo-800 to-violet-900 text-white shadow-lg sticky top-0 z-40 border-b border-indigo-700/50">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+          <span class="p-1.5 bg-white/10 rounded-lg shadow-inner">🎓</span> Knowledge Hub Interview Questions
+        </h1>
+        <p class="text-xs text-indigo-200 mt-0.5">Coaching Institute Community Question Tracker &bull; Hyderabad</p>
+      </div>
+      <!-- View Navigation Tabs -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="nav-search-btn" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-white text-indigo-900 shadow-sm transition hover:bg-slate-100 flex items-center gap-1.5">
+          <span>🔍</span> Search Questions
+        </button>
+        <button id="nav-add-btn" class="px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-indigo-600/80 hover:bg-indigo-500 text-white border border-indigo-400/30 shadow-sm transition flex items-center gap-1.5">
+          <span>➕</span> Post Interview Experience
+        </button>
+        <button id="nav-trash-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-950/60 hover:bg-indigo-950 text-indigo-200 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5">
+          <span>🗑️</span> Recycle Bin <span id="trash-count-badge" class="px-1.5 py-0.2 bg-rose-500 text-white text-[11px] font-bold rounded-full ml-0.5">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="hidden mb-4 p-3.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 text-sm flex items-center justify-between shadow-xs">
+      <span id="toast-message">Experience submitted successfully!</span>
+      <button id="toast-close" class="text-emerald-700 font-bold ml-3 text-base leading-none">&times;</button>
+    </div>
+
+    <!-- VIEW 1: SEARCH & BROWSE QUESTIONS -->
+    <section id="view-search" class="space-y-6">
+      <!-- Search Filter Card -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 pb-3 border-b border-slate-100 gap-2">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-800">Find Interview Questions</h2>
+            <p class="text-xs text-slate-500">Filter by company, technical topic, or experience level in real time</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="results-count-badge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-medium border border-indigo-100">
+              Loading questions...
+            </span>
+            <button type="button" id="btn-refresh-questions" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center gap-1 shadow-xs border border-slate-200" title="Refresh questions from database">
+              <span>🔄</span> Refresh
+            </button>
+            <button type="button" id="btn-export-csv" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center gap-1 shadow-xs border border-slate-200">
+              <span>📥</span> Export CSV
+            </button>
+            <button type="button" id="btn-print-view" class="px-2.5 py-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center gap-1 shadow-xs border border-slate-200">
+              <span>🖨️</span> Print / PDF
+            </button>
+          </div>
+        </div>
+
+        <form id="search-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <!-- Company Filter -->
+          <div>
+            <label for="search-company" class="block text-xs font-semibold text-slate-600 mb-1">Company Name</label>
+            <input type="text" id="search-company" placeholder="e.g. Cognizant, TCS" 
+                   class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <!-- Topic / Skill Filter -->
+          <div>
+            <label for="search-topic" class="block text-xs font-semibold text-slate-600 mb-1">Topic / Skill</label>
+            <input type="text" id="search-topic" placeholder="e.g. Linux, Java, AWS" 
+                   class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <!-- Experience / Seniority Filter -->
+          <div>
+            <label for="search-experience" class="block text-xs font-semibold text-slate-600 mb-1">Seniority / Experience</label>
+            <select id="search-experience" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">All Experience Levels</option>
+              <option value="Fresher (0-1 yrs)">Fresher (0-1 yrs)</option>
+              <option value="Junior (1-3 yrs)">Junior (1-3 yrs)</option>
+              <option value="Mid-Level (3-5 yrs)">Mid-Level (3-5 yrs)</option>
+              <option value="Senior (5+ yrs)">Senior (5+ yrs)</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-end gap-2">
+            <button type="submit" id="btn-search" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition">
+              Search
+            </button>
+            <button type="button" id="btn-reset-search" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-3 rounded-lg text-sm transition">
+              Clear
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick filter chips -->
+        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+          <span>Quick filters:</span>
+          <button type="button" class="quick-chip px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-md transition" data-company="Cognizant" data-topic="Linux">Cognizant + Linux</button>
+          <button type="button" class="quick-chip px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-md transition" data-company="TCS" data-topic="Java">TCS + Java</button>
+          <button type="button" class="quick-chip px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-md transition" data-company="Infosys" data-topic="Python">Infosys + Python</button>
+          <button type="button" class="quick-chip px-2.5 py-1 bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 rounded-md transition" data-company="" data-topic="AWS">AWS</button>
+        </div>
+      </div>
+
+      <!-- Question List Container -->
+      <div id="questions-container" class="space-y-4">
+        <!-- Injected via JavaScript from Database / Fetch -->
+      </div>
+    </section>
+
+    <!-- VIEW 3: RECYCLE BIN (DELETED ITEMS) -->
+    <section id="view-trash" class="hidden space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <span>🗑️</span> Recycle Bin (Deleted Items)
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Items deleted accidentally or for review. You can restore them anytime or permanently remove them.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-empty-trash" class="px-3 py-1.5 text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg transition border border-rose-200 flex items-center gap-1">
+              <span>🧹</span> Empty Recycle Bin
+            </button>
+            <button type="button" id="btn-back-from-trash" class="px-3 py-1.5 text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition border border-indigo-200 flex items-center gap-1">
+              <span>⬅️</span> Back to Search
+            </button>
+          </div>
+        </div>
+
+        <div id="trash-container" class="mt-4 space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: SUBMIT INTERVIEW EXPERIENCE -->
+    <section id="view-add" class="hidden max-w-3xl mx-auto">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div class="mb-5 pb-3 border-b border-slate-100">
+          <h2 id="form-heading" class="text-xl font-bold text-slate-800">Post Interview Experience</h2>
+          <p class="text-xs text-slate-500 mt-1">Submit your interview questions to help fellow students prepare. Entries are stored directly in the central database.</p>
+        </div>
+
+        <form id="add-experience-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Candidate Name -->
+            <div>
+              <label for="form-candidate" class="block text-xs font-semibold text-slate-700 mb-1">Candidate Name (You) *</label>
+              <input type="text" id="form-candidate" required placeholder="e.g. Ramesh Kumar, Sneha Reddy"
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Interviewer Name / Panel -->
+            <div>
+              <label for="form-interviewer" class="block text-xs font-semibold text-slate-700 mb-1">Interviewer Name / Panel (Optional)</label>
+              <input type="text" id="form-interviewer" placeholder="e.g. Lead Engineer Rajesh, HR Deepa"
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Interview Date -->
+            <div>
+              <label for="form-date" class="block text-xs font-semibold text-slate-700 mb-1">Interview Date *</label>
+              <input type="date" id="form-date" required
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Company Name -->
+            <div>
+              <label for="form-company" class="block text-xs font-semibold text-slate-700 mb-1">Company Name *</label>
+              <input type="text" id="form-company" required placeholder="e.g. Cognizant, Wipro, TCS"
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Applied Role -->
+            <div>
+              <label for="form-role" class="block text-xs font-semibold text-slate-700 mb-1">Applied Role *</label>
+              <input type="text" id="form-role" required placeholder="e.g. Linux System Engineer, Java Dev"
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Seniority / Experience Level -->
+            <div>
+              <label for="form-seniority" class="block text-xs font-semibold text-slate-700 mb-1">Seniority / Experience Level *</label>
+              <select id="form-seniority" required
+                      class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Select level...</option>
+                <option value="Fresher (0-1 yrs)">Fresher (0-1 yrs)</option>
+                <option value="Junior (1-3 yrs)">Junior (1-3 yrs)</option>
+                <option value="Mid-Level (3-5 yrs)">Mid-Level (3-5 yrs)</option>
+                <option value="Senior (5+ yrs)">Senior (5+ yrs)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Interview Round -->
+            <div>
+              <label for="form-round" class="block text-xs font-semibold text-slate-700 mb-1">Interview Round *</label>
+              <select id="form-round" required
+                      class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Select round...</option>
+                <option value="Round 1: Screening / Technical">Round 1: Screening / Technical</option>
+                <option value="Round 2: Deep Technical / Live Coding">Round 2: Deep Technical / Live Coding</option>
+                <option value="Round 3: System Design / Manager Round">Round 3: System Design / Manager Round</option>
+                <option value="Round 4: HR / Behavioral Round">Round 4: HR / Behavioral Round</option>
+              </select>
+            </div>
+
+            <!-- Primary Topics / Skills Covered -->
+            <div>
+              <label for="form-topics" class="block text-xs font-semibold text-slate-700 mb-1">Topics / Skills (Comma separated) *</label>
+              <input type="text" id="form-topics" required placeholder="e.g. Linux, Shell Scripting, File Permissions"
+                     class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <!-- Job Description -->
+          <div>
+            <label for="form-jd" class="block text-xs font-semibold text-slate-700 mb-1">Brief Job Description / Requirements (Optional)</label>
+            <textarea id="form-jd" rows="2" placeholder="e.g. Required 2+ years working with Red Hat Linux, bash automation, and L2 server support."
+                      class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          </div>
+
+          <!-- Questions Asked -->
+          <div>
+            <label for="form-questions" class="block text-xs font-semibold text-slate-700 mb-1">Interview Questions Asked * (Put each question on a new line)</label>
+            <textarea id="form-questions" rows="6" required placeholder="1. What is the difference between hard link and soft link in Linux?&#10;2. How do you find files modified in the last 24 hours using the find command?&#10;3. Explain runlevels and systemd service creation."
+                      class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <button type="button" id="btn-cancel-add" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium transition">
+              Cancel
+            </button>
+            <button type="submit" id="btn-submit-experience" class="px-5 py-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm transition flex items-center gap-2">
+              <span id="btn-submit-spinner" class="hidden w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <span id="btn-submit-text">Submit Interview Experience</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+        <div class="flex items-center gap-3 text-rose-600 mb-3">
+          <span class="text-2xl">⚠️</span>
+          <h3 class="text-lg font-bold text-slate-800">Delete Interview Record?</h3>
+        </div>
+        <p class="text-sm text-slate-600 mb-2">
+          Are you sure you want to remove this interview experience? It will be moved to the Recycle Bin.
+        </p>
+        <div id="delete-modal-details" class="p-3 bg-slate-50 rounded-lg text-xs font-medium text-slate-700 border border-slate-200 mb-5">
+          <!-- Populated by JS -->
+        </div>
+        <div class="flex items-center justify-end gap-3">
+          <button type="button" id="btn-cancel-delete" class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 font-medium rounded-lg transition">
+            Cancel
+          </button>
+          <button type="button" id="btn-confirm-delete" class="px-4 py-2 text-sm bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow-sm transition">
+            Yes, Delete Record
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5-SECOND UNDO TOAST -->
+    <div id="undo-toast" class="hidden fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-bounce-once">
+      <div class="w-8 h-8 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center font-bold text-base">🗑️</div>
+      <div>
+        <p class="text-xs font-semibold text-slate-200" id="undo-toast-text">Interview record removed</p>
+        <p class="text-[11px] text-slate-400">Undo available for <span id="undo-timer" class="font-bold text-amber-400">5</span>s</p>
+      </div>
+      <button type="button" id="btn-undo-delete" class="ml-2 px-3 py-1 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs rounded-lg shadow transition">
+        Undo
+      </button>
+      <button type="button" id="btn-undo-dismiss" class="text-slate-400 hover:text-white text-base font-bold ml-1 leading-none">&times;</button>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    <p>Knowledge Hub Interview Questions Portal &bull; Hyderabad Coaching Community &bull; 100% Free & Open Source</p>
+  </footer>
+
+  <!-- App Script -->
+  <script>
+    // =========================================================================
+    // GOOGLE APPS SCRIPT WEB APP BACKEND CONFIGURATION
+    // Linked Google Sheet:
+    // https://docs.google.com/spreadsheets/d/11r1L6Q_ZRWO82Al4_wGK2SSZjxtlhTtgCvUhbbpAMk8/edit?pli=1&gid=0#gid=0
+    // =========================================================================
+    const GOOGLE_SCRIPT_BACKEND_URL = "https://script.google.com/macros/s/AKfycbzyKtYAIEDTRAXDXTN3j9X6RY_9g0sNy2VZHTDDBZskEKMPM7diR1A03a9TqdIYSNI/exec";
+
+    // Local Storage Keys for Recycle Bin
+    const TRASH_STORAGE_KEY = "hyd_interview_bank_trash_v1";
+
+    // In-memory data store (NOT bloated in HTML; populated dynamically on search)
+    let interviewRecords = [];
+    let trashRecords = getStoredTrash();
+    let isFetchingFromSheet = false;
+    let editingRecordId = null;
+    let pendingDeleteId = null;
+    let lastDeletedItem = null;
+    let undoTimerInterval = null;
+    let undoSecondsLeft = 5;
+
+    // DOM Elements
+    const formHeading = document.getElementById("form-heading");
+    const btnSubmitText = document.getElementById("btn-submit-text");
+    const btnSubmitSpinner = document.getElementById("btn-submit-spinner");
+    const btnSubmitExperience = document.getElementById("btn-submit-experience");
+
+    const deleteModal = document.getElementById("delete-modal");
+    const deleteModalDetails = document.getElementById("delete-modal-details");
+    const btnCancelDelete = document.getElementById("btn-cancel-delete");
+    const btnConfirmDelete = document.getElementById("btn-confirm-delete");
+
+    const navSearchBtn = document.getElementById("nav-search-btn");
+    const navAddBtn = document.getElementById("nav-add-btn");
+    const navTrashBtn = document.getElementById("nav-trash-btn");
+
+    const trashCountBadge = document.getElementById("trash-count-badge");
+    const viewSearch = document.getElementById("view-search");
+    const viewAdd = document.getElementById("view-add");
+    const viewTrash = document.getElementById("view-trash");
+    const trashContainer = document.getElementById("trash-container");
+    const btnEmptyTrash = document.getElementById("btn-empty-trash");
+    const btnBackFromTrash = document.getElementById("btn-back-from-trash");
+    const btnRefreshQuestions = document.getElementById("btn-refresh-questions");
+
+    const undoToast = document.getElementById("undo-toast");
+    const undoToastText = document.getElementById("undo-toast-text");
+    const undoTimer = document.getElementById("undo-timer");
+    const btnUndoDelete = document.getElementById("btn-undo-delete");
+    const btnUndoDismiss = document.getElementById("btn-undo-dismiss");
+    const btnExportCsv = document.getElementById("btn-export-csv");
+    const btnPrintView = document.getElementById("btn-print-view");
+    const questionsContainer = document.getElementById("questions-container");
+    const resultsCountBadge = document.getElementById("results-count-badge");
+    const searchForm = document.getElementById("search-form");
+    const searchCompany = document.getElementById("search-company");
+    const searchTopic = document.getElementById("search-topic");
+    const searchExperience = document.getElementById("search-experience");
+    const btnResetSearch = document.getElementById("btn-reset-search");
+    const addExperienceForm = document.getElementById("add-experience-form");
+    const btnCancelAdd = document.getElementById("btn-cancel-add");
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toast-message");
+    const toastClose = document.getElementById("toast-close");
+    const formDate = document.getElementById("form-date");
+
+    // Trash persistence
+    function getStoredTrash() {
+      try {
+        const raw = localStorage.getItem(TRASH_STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveTrash(trashList) {
+      try {
+        localStorage.setItem(TRASH_STORAGE_KEY, JSON.stringify(trashList));
+      } catch (err) {
+        console.error("Trash storage error:", err);
+      }
+      updateTrashBadge();
+    }
+
+    function updateTrashBadge() {
+      if (trashCountBadge) {
+        trashCountBadge.textContent = trashRecords.length;
+        if (trashRecords.length === 0) {
+          trashCountBadge.classList.add("opacity-60");
+        } else {
+          trashCountBadge.classList.remove("opacity-60");
+        }
+      }
+    }
+
+    // Set default date to today
+    if (formDate) {
+      const today = new Date().toISOString().split("T")[0];
+      formDate.value = today;
+    }
+
+    // Toast helper
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 4500);
+    }
+
+    if (toastClose) {
+      toastClose.addEventListener("click", () => {
+        toast.classList.add("hidden");
+      });
+    }
+
+    // =========================================================================
+    // DYNAMIC DATA FETCH: FETCHES DIRECTLY FROM GOOGLE SHEETS
+    // Triggered when user clicks "Search Questions" or page loads search view
+    // =========================================================================
+    async function fetchQuestionsFromGoogleSheet(isManual = false) {
+      if (isFetchingFromSheet) return;
+
+      if (!GOOGLE_SCRIPT_BACKEND_URL || 
+          GOOGLE_SCRIPT_BACKEND_URL.includes("YOUR_DEPLOYED_WEB_APP_ID") ||
+          !GOOGLE_SCRIPT_BACKEND_URL.startsWith("https://script.google.com/macros/s/")) {
+        // Fallback placeholder message if URL is not configured yet
+        resultsCountBadge.textContent = "Database URL not configured";
+        questionsContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
+            <div class="text-3xl mb-2">⚙️</div>
+            <h3 class="text-base font-semibold text-slate-700">Google Sheets Web App URL Required</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+              Please paste your deployed Google Apps Script Web App URL (/exec) into <code>GOOGLE_SCRIPT_BACKEND_URL</code>.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      isFetchingFromSheet = true;
+      resultsCountBadge.textContent = "Fetching live questions...";
+      questionsContainer.innerHTML = `
+        <div class="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-xs">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-3 border-indigo-600 border-t-transparent mb-3"></div>
+          <h4 class="text-sm font-semibold text-slate-800">Loading questions from Google Sheets...</h4>
+          <p class="text-xs text-slate-500 mt-1">Retrieving latest candidate experiences from the database</p>
+        </div>
+      `;
+
+      try {
+        const response = await fetch(GOOGLE_SCRIPT_BACKEND_URL, { method: "GET" });
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          // Standardize and clean fields from spreadsheet
+          interviewRecords = data.map(r => ({
+            id: String(r.id || "exp-" + Date.now()),
+            date: typeof r.date === "string" && r.date.includes("T") ? r.date.split("T")[0] : String(r.date || ""),
+            candidate: String(r.candidate || "Anonymous"),
+            company: String(r.company || ""),
+            role: String(r.role || ""),
+            seniority: String(r.seniority || ""),
+            round: String(r.round || ""),
+            interviewer: String(r.interviewer || ""),
+            topics: Array.isArray(r.topics) ? r.topics : (r.topics ? String(r.topics).split(", ") : []),
+            jd: String(r.jd || ""),
+            questions: Array.isArray(r.questions) ? r.questions : (r.questions ? String(r.questions).split("\n") : [])
+          }));
+
+          applyFilter();
+          if (isManual) {
+            showToast(`Loaded ${interviewRecords.length} questions from Google Sheets!`);
+          }
+        } else {
+          interviewRecords = [];
+          applyFilter();
+        }
+      } catch (err) {
+        console.error("Google Sheets fetch error:", err);
+        resultsCountBadge.textContent = "Error loading data";
+        questionsContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-dashed border-rose-200 p-8 text-center bg-rose-50/50">
+            <div class="text-3xl mb-2 text-rose-500">⚠️</div>
+            <h4 class="text-sm font-semibold text-slate-800">Could not fetch questions from Google Sheets</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              Please ensure your Apps Script is deployed as Web App with <strong>Who has access: Anyone</strong>.
+            </p>
+            <button id="btn-retry-fetch" class="mt-4 px-3.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-xs transition">
+              Retry Connection
+            </button>
+          </div>
+        `;
+        const retryBtn = document.getElementById("btn-retry-fetch");
+        if (retryBtn) {
+          retryBtn.addEventListener("click", () => fetchQuestionsFromGoogleSheet(true));
+        }
+      } finally {
+        isFetchingFromSheet = false;
+      }
+    }
+
+    // =========================================================================
+    // SUBMISSION & BACKGROUND INSERTION: PUSHES DIRECTLY TO GOOGLE SHEETS
+    // Does NOT accumulate row data inside the local HTML form
+    // =========================================================================
+    async function sendToGoogleSheetBackend(payload) {
+      if (!GOOGLE_SCRIPT_BACKEND_URL || 
+          GOOGLE_SCRIPT_BACKEND_URL.includes("YOUR_DEPLOYED_WEB_APP_ID") ||
+          !GOOGLE_SCRIPT_BACKEND_URL.startsWith("https://script.google.com/macros/s/")) {
+        console.warn("Google Apps Script URL not configured.");
+        return;
+      }
+
+      try {
+        await fetch(GOOGLE_SCRIPT_BACKEND_URL, {
+          method: "POST",
+          mode: "no-cors", // Bypasses browser CORS preflight check
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error("Google Sheet POST error:", err);
+      }
+    }
+
+    // Switch Views
+    function showView(view) {
+      viewSearch.classList.add("hidden");
+      viewAdd.classList.add("hidden");
+      viewTrash.classList.add("hidden");
+
+      navSearchBtn.className = "px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-indigo-950/60 hover:bg-indigo-950 text-indigo-200 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5";
+      navAddBtn.className = "px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-indigo-950/60 hover:bg-indigo-950 text-indigo-200 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5";
+      navTrashBtn.className = "px-3 py-1.5 rounded-lg text-sm font-semibold bg-indigo-950/60 hover:bg-indigo-950 text-indigo-200 hover:text-white border border-indigo-500/30 transition flex items-center gap-1.5";
+
+      if (view === "search") {
+        viewSearch.classList.remove("hidden");
+        navSearchBtn.className = "px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-white text-indigo-900 shadow-sm transition hover:bg-slate-100 flex items-center gap-1.5";
+      } else if (view === "add") {
+        viewAdd.classList.remove("hidden");
+        navAddBtn.className = "px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-white text-indigo-900 shadow-sm transition hover:bg-slate-100 flex items-center gap-1.5";
+      } else if (view === "trash") {
+        viewTrash.classList.remove("hidden");
+        navTrashBtn.className = "px-3 py-1.5 rounded-lg text-sm font-semibold bg-white text-indigo-900 shadow-sm transition hover:bg-slate-100 flex items-center gap-1.5";
+        renderTrash();
+      }
+    }
+
+    function resetFormState() {
+      editingRecordId = null;
+      addExperienceForm.reset();
+      const candEl = document.getElementById("form-candidate");
+      const intEl = document.getElementById("form-interviewer");
+      if (candEl) candEl.value = "";
+      if (intEl) intEl.value = "";
+      const today = new Date().toISOString().split("T")[0];
+      if (formDate) formDate.value = today;
+      if (formHeading) formHeading.textContent = "Post Interview Experience";
+      if (btnSubmitText) btnSubmitText.textContent = "Submit Interview Experience";
+    }
+
+    // NAVIGATION ACTIONS
+    // When user clicks "Search Questions", fetch directly from Google Sheet!
+    navSearchBtn.addEventListener("click", () => {
+      showView("search");
+      fetchQuestionsFromGoogleSheet();
+    });
+
+    btnRefreshQuestions.addEventListener("click", () => {
+      fetchQuestionsFromGoogleSheet(true);
+    });
+
+    navAddBtn.addEventListener("click", () => {
+      resetFormState();
+      showView("add");
+    });
+
+    navTrashBtn.addEventListener("click", () => showView("trash"));
+    btnBackFromTrash.addEventListener("click", () => {
+      showView("search");
+      fetchQuestionsFromGoogleSheet();
+    });
+
+    btnCancelAdd.addEventListener("click", () => {
+      resetFormState();
+      showView("search");
+    });
+
+    // Render questions dynamically
+    function renderQuestions(items) {
+      questionsContainer.innerHTML = "";
+      resultsCountBadge.textContent = `${items.length} ${items.length === 1 ? 'Interview Record' : 'Interview Records'} Found`;
+
+      if (items.length === 0) {
+        questionsContainer.innerHTML = `
+          <div class="bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
+            <div class="text-4xl mb-3">🔍</div>
+            <h3 class="text-base font-semibold text-slate-700">No interview questions match your filter</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Try clearing one of the filters above, or be the first student to add questions!</p>
+            <button id="empty-state-reset" class="mt-4 px-4 py-1.5 bg-indigo-50 text-indigo-600 font-medium rounded-lg text-xs hover:bg-indigo-100 transition">
+              Reset Filters
+            </button>
+          </div>
+        `;
+        const resetBtn = document.getElementById("empty-state-reset");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            searchCompany.value = "";
+            searchTopic.value = "";
+            searchExperience.value = "";
+            applyFilter();
+          });
+        }
+        return;
+      }
+
+      items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow transition";
+
+        const topicsBadges = (item.topics || []).map(t => 
+          `<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">${escapeHtml(t)}</span>`
+        ).join(" ");
+
+        const questionsListHtml = (item.questions || []).map((q, idx) => `
+          <li class="flex items-start gap-2.5 text-sm text-slate-800">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold shrink-0 mt-0.5">${idx + 1}</span>
+            <span class="leading-relaxed">${escapeHtml(q)}</span>
+          </li>
+        `).join("");
+
+        card.innerHTML = `
+          <!-- Card Header -->
+          <div class="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-base font-bold text-indigo-900">${escapeHtml(item.company)}</span>
+                <span class="text-xs text-slate-400">&bull;</span>
+                <span class="text-sm font-semibold text-slate-700">${escapeHtml(item.role)}</span>
+              </div>
+              <div class="text-xs text-slate-500 mt-1 flex items-center gap-2 flex-wrap">
+                <span class="font-medium text-indigo-600">${escapeHtml(item.round)}</span>
+                <span>&bull;</span>
+                <span class="bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200 font-medium">${escapeHtml(item.seniority)}</span>
+                <span>&bull;</span>
+                <span>Date: ${escapeHtml(item.date)}</span>
+                <span>&bull;</span>
+                <span class="text-slate-700">Candidate: <strong class="text-indigo-900">${escapeHtml(item.candidate || 'Anonymous')}</strong></span>
+                ${item.interviewer ? `<span>&bull;</span><span class="text-slate-600">Interviewer: <em>${escapeHtml(item.interviewer)}</em></span>` : ''}
+              </div>
+            </div>
+            <div class="flex flex-col sm:items-end gap-2">
+              <div class="flex flex-wrap gap-1 items-center">
+                ${topicsBadges}
+              </div>
+              <div class="flex items-center gap-1.5 pt-1 flex-wrap justify-end">
+                <button type="button" class="btn-card-whatsapp px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition flex items-center gap-1 border border-emerald-200/80 shadow-xs" data-id="${item.id}">
+                  <span>💬</span> WhatsApp
+                </button>
+                <button type="button" class="btn-card-copy px-2.5 py-1 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-md transition flex items-center gap-1 border border-sky-200/80 shadow-xs" data-id="${item.id}">
+                  <span>📋</span> Copy
+                </button>
+                <button type="button" class="btn-card-edit px-2.5 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-md transition flex items-center gap-1 border border-indigo-200/80 shadow-xs" data-id="${item.id}">
+                  <span>✏️</span> Edit
+                </button>
+                <button type="button" class="btn-card-delete px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-md transition flex items-center gap-1 border border-rose-200/80 shadow-xs" data-id="${item.id}">
+                  <span>🗑️</span> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Body: Questions -->
+          <div class="p-4 sm:p-5">
+            ${item.jd ? `
+              <div class="mb-3.5 p-3 rounded-lg bg-slate-50 text-xs text-slate-600 border border-slate-200/80">
+                <strong class="text-slate-700">Role Context / JD:</strong> ${escapeHtml(item.jd)}
+              </div>
+            ` : ''}
+
+            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Recollected Questions (${(item.questions || []).length}):</h4>
+            <ul class="space-y-2.5">
+              ${questionsListHtml}
+            </ul>
+          </div>
+        `;
+        questionsContainer.appendChild(card);
+      });
+    }
+
+    // Dynamic Filter Logic
+    function applyFilter() {
+      const companyVal = searchCompany.value.trim().toLowerCase();
+      const topicVal = searchTopic.value.trim().toLowerCase();
+      const expVal = searchExperience.value;
+
+      const filtered = interviewRecords.filter(item => {
+        const matchCompany = !companyVal || 
+          (item.company && item.company.toLowerCase().includes(companyVal)) || 
+          (item.candidate && item.candidate.toLowerCase().includes(companyVal));
+
+        const matchTopic = !topicVal || 
+          (item.topics && item.topics.some(t => t.toLowerCase().includes(topicVal))) ||
+          (item.questions && item.questions.some(q => q.toLowerCase().includes(topicVal))) ||
+          (item.role && item.role.toLowerCase().includes(topicVal));
+
+        const matchExp = !expVal || item.seniority === expVal;
+
+        return matchCompany && matchTopic && matchExp;
+      });
+
+      renderQuestions(filtered);
+    }
+
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      applyFilter();
+    });
+
+    searchCompany.addEventListener("input", applyFilter);
+    searchTopic.addEventListener("input", applyFilter);
+    searchExperience.addEventListener("change", applyFilter);
+
+    btnResetSearch.addEventListener("click", () => {
+      searchCompany.value = "";
+      searchTopic.value = "";
+      searchExperience.value = "";
+      applyFilter();
+    });
+
+    document.querySelectorAll(".quick-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        searchCompany.value = chip.dataset.company || "";
+        searchTopic.value = chip.dataset.topic || "";
+        searchExperience.value = "";
+        applyFilter();
+      });
+    });
+
+    // Render Trash Records
+    function renderTrash() {
+      trashContainer.innerHTML = "";
+      if (trashRecords.length === 0) {
+        trashContainer.innerHTML = `
+          <div class="p-10 text-center border border-dashed border-slate-300 rounded-xl bg-slate-50">
+            <div class="text-3xl mb-2">🗑️</div>
+            <h4 class="text-sm font-semibold text-slate-700">Recycle Bin is Empty</h4>
+            <p class="text-xs text-slate-500 mt-0.5">Deleted questions will appear here and can be restored anytime.</p>
+          </div>
+        `;
+        return;
+      }
+
+      trashRecords.forEach((item) => {
+        const itemCard = document.createElement("div");
+        itemCard.className = "p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-100/60 transition";
+        itemCard.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-slate-800 text-sm">${escapeHtml(item.company)}</span>
+              <span class="text-xs text-slate-400">&bull;</span>
+              <span class="text-xs font-semibold text-slate-700">${escapeHtml(item.role)}</span>
+              <span class="text-xs text-slate-400">&bull;</span>
+              <span class="text-xs text-slate-500">${escapeHtml(item.round)}</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">
+              <span>Candidate: <strong>${escapeHtml(item.candidate || 'Anonymous')}</strong></span> &bull;
+              <span>${(item.questions || []).length} questions</span> &bull;
+              <span>Deleted: ${item.deletedAt ? new Date(item.deletedAt).toLocaleTimeString() : 'Recently'}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+            <button type="button" class="btn-restore-trash px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-xs transition flex items-center gap-1" data-id="${item.id}">
+              <span>♻️</span> Restore
+            </button>
+            <button type="button" class="btn-permanent-delete px-3 py-1.5 text-xs font-semibold bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg transition flex items-center gap-1" data-id="${item.id}">
+              <span>❌</span> Delete Forever
+            </button>
+          </div>
+        `;
+        trashContainer.appendChild(itemCard);
+      });
+    }
+
+    // Trash delegation
+    trashContainer.addEventListener("click", (e) => {
+      const restoreBtn = e.target.closest(".btn-restore-trash");
+      const permDeleteBtn = e.target.closest(".btn-permanent-delete");
+
+      if (restoreBtn) {
+        const id = restoreBtn.dataset.id;
+        const idx = trashRecords.findIndex(r => r.id === id);
+        if (idx !== -1) {
+          const restored = trashRecords.splice(idx, 1)[0];
+          delete restored.deletedAt;
+          saveTrash(trashRecords);
+          renderTrash();
+          showToast(`Restoring ${restored.company} to Google Sheets...`);
+
+          // Re-insert into Google Sheets
+          sendToGoogleSheetBackend({
+            action: "create",
+            date: restored.date,
+            candidate: restored.candidate,
+            company: restored.company,
+            role: restored.role,
+            seniority: restored.seniority,
+            round: restored.round,
+            interviewer: restored.interviewer || "",
+            topics: restored.topics || [],
+            jd: restored.jd || "",
+            questions: restored.questions || []
+          });
+        }
+      } else if (permDeleteBtn) {
+        const id = permDeleteBtn.dataset.id;
+        const idx = trashRecords.findIndex(r => r.id === id);
+        if (idx !== -1) {
+          const removed = trashRecords.splice(idx, 1)[0];
+          saveTrash(trashRecords);
+          renderTrash();
+          showToast(`Permanently deleted ${removed.company} record.`);
+
+          // Delete from Google Sheets
+          sendToGoogleSheetBackend({ action: "delete", id: removed.id });
+        }
+      }
+    });
+
+    btnEmptyTrash.addEventListener("click", () => {
+      if (trashRecords.length === 0) {
+        showToast("Recycle bin is already empty.");
+        return;
+      }
+      const count = trashRecords.length;
+      trashRecords.forEach(r => {
+        sendToGoogleSheetBackend({ action: "delete", id: r.id });
+      });
+      trashRecords = [];
+      saveTrash(trashRecords);
+      renderTrash();
+      showToast(`Emptied ${count} items from the Recycle Bin.`);
+    });
+
+    // Event delegation on questions container for Edit, Delete, WhatsApp, Copy
+    questionsContainer.addEventListener("click", (e) => {
+      const editBtn = e.target.closest(".btn-card-edit");
+      const deleteBtn = e.target.closest(".btn-card-delete");
+      const whatsappBtn = e.target.closest(".btn-card-whatsapp");
+      const copyBtn = e.target.closest(".btn-card-copy");
+
+      if (editBtn) {
+        const id = editBtn.dataset.id;
+        startEditRecord(id);
+      } else if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        openDeleteModal(id);
+      } else if (whatsappBtn) {
+        const id = whatsappBtn.dataset.id;
+        shareOnWhatsApp(id);
+      } else if (copyBtn) {
+        const id = copyBtn.dataset.id;
+        copyQuestionsText(id);
+      }
+    });
+
+    // Start Editing Record
+    function startEditRecord(id) {
+      const record = interviewRecords.find(r => r.id === id);
+      if (!record) return;
+
+      editingRecordId = id;
+      document.getElementById("form-candidate").value = record.candidate || "";
+      document.getElementById("form-interviewer").value = record.interviewer || "";
+      document.getElementById("form-date").value = record.date || "";
+      document.getElementById("form-company").value = record.company || "";
+      document.getElementById("form-role").value = record.role || "";
+      document.getElementById("form-seniority").value = record.seniority || "";
+      document.getElementById("form-round").value = record.round || "";
+      document.getElementById("form-topics").value = (record.topics || []).join(", ");
+      document.getElementById("form-jd").value = record.jd || "";
+      document.getElementById("form-questions").value = (record.questions || []).join("\n");
+
+      if (formHeading) formHeading.textContent = `Edit Interview Experience: ${record.company}`;
+      if (btnSubmitText) btnSubmitText.textContent = "Update & Save to Google Sheets";
+
+      showView("add");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Open Delete Modal
+    function openDeleteModal(id) {
+      const record = interviewRecords.find(r => r.id === id);
+      if (!record) return;
+
+      pendingDeleteId = id;
+      deleteModalDetails.innerHTML = `
+        <div class="font-bold text-slate-800">${escapeHtml(record.company)} &bull; ${escapeHtml(record.role)}</div>
+        <div class="text-slate-500 mt-0.5">${escapeHtml(record.round)} (${escapeHtml(record.seniority)})</div>
+        <div class="text-slate-500 text-[11px] mt-1">${(record.questions || []).length} questions will be moved to the Recycle Bin.</div>
+      `;
+      deleteModal.classList.remove("hidden");
+    }
+
+    function closeDeleteModal() {
+      pendingDeleteId = null;
+      deleteModal.classList.add("hidden");
+    }
+
+    btnCancelDelete.addEventListener("click", closeDeleteModal);
+
+    // Confirm Delete
+    btnConfirmDelete.addEventListener("click", () => {
+      if (!pendingDeleteId) return;
+
+      const idx = interviewRecords.findIndex(r => r.id === pendingDeleteId);
+      if (idx !== -1) {
+        const removed = interviewRecords.splice(idx, 1)[0];
+        applyFilter();
+
+        // Move to trash
+        removed.deletedAt = new Date().toISOString();
+        trashRecords.unshift(removed);
+        saveTrash(trashRecords);
+
+        // Delete from Google Sheet
+        sendToGoogleSheetBackend({ action: "delete", id: removed.id });
+
+        triggerUndoToast(removed);
+      }
+      closeDeleteModal();
+    });
+
+    // 5-Second Undo Toast
+    function triggerUndoToast(item) {
+      lastDeletedItem = item;
+      undoSecondsLeft = 5;
+      undoToastText.textContent = `Moved ${item.company} (${item.role}) to Recycle Bin.`;
+      undoTimer.textContent = undoSecondsLeft;
+      undoToast.classList.remove("hidden");
+
+      if (undoTimerInterval) clearInterval(undoTimerInterval);
+
+      undoTimerInterval = setInterval(() => {
+        undoSecondsLeft--;
+        if (undoSecondsLeft > 0) {
+          undoTimer.textContent = undoSecondsLeft;
+        } else {
+          clearInterval(undoTimerInterval);
+          undoToast.classList.add("hidden");
+        }
+      }, 1000);
+    }
+
+    btnUndoDismiss.addEventListener("click", () => {
+      if (undoTimerInterval) clearInterval(undoTimerInterval);
+      undoToast.classList.add("hidden");
+    });
+
+    btnUndoDelete.addEventListener("click", () => {
+      if (!lastDeletedItem) return;
+
+      if (undoTimerInterval) clearInterval(undoTimerInterval);
+      undoToast.classList.add("hidden");
+
+      const trashIdx = trashRecords.findIndex(r => r.id === lastDeletedItem.id);
+      if (trashIdx !== -1) {
+        const restored = trashRecords.splice(trashIdx, 1)[0];
+        delete restored.deletedAt;
+        saveTrash(trashRecords);
+        showToast(`Restoring interview experience for ${restored.company}...`);
+
+        sendToGoogleSheetBackend({
+          action: "create",
+          date: restored.date,
+          candidate: restored.candidate,
+          company: restored.company,
+          role: restored.role,
+          seniority: restored.seniority,
+          round: restored.round,
+          interviewer: restored.interviewer || "",
+          topics: restored.topics || [],
+          jd: restored.jd || "",
+          questions: restored.questions || []
+        });
+
+        // Refresh views from Google Sheet
+        setTimeout(() => fetchQuestionsFromGoogleSheet(), 600);
+      }
+      lastDeletedItem = null;
+    });
+
+    // =========================================================================
+    // FORM SUBMISSION EVENT: DIRECT INSERTION INTO GOOGLE SHEETS
+    // Does NOT insert row data into the HTML form/client store
+    // =========================================================================
+    addExperienceForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const candidate = document.getElementById("form-candidate").value.trim();
+      const interviewer = document.getElementById("form-interviewer").value.trim();
+      const date = document.getElementById("form-date").value;
+      const company = document.getElementById("form-company").value.trim();
+      const role = document.getElementById("form-role").value.trim();
+      const seniority = document.getElementById("form-seniority").value;
+      const round = document.getElementById("form-round").value;
+      const topicsRaw = document.getElementById("form-topics").value;
+      const jd = document.getElementById("form-jd").value.trim();
+      const questionsRaw = document.getElementById("form-questions").value;
+
+      const topics = topicsRaw.split(",")
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+
+      const questions = questionsRaw.split("\n")
+        .map(q => q.trim().replace(/^[\d+.)\-*]\s*/, "").trim())
+        .filter(q => q.length > 0);
+
+      if (questions.length === 0) {
+        showToast("Please enter at least one interview question.");
+        return;
+      }
+
+      const payload = {
+        candidate,
+        interviewer,
+        date,
+        company,
+        role,
+        seniority,
+        round,
+        topics,
+        jd,
+        questions
+      };
+
+      // Show submitting state on button
+      btnSubmitSpinner.classList.remove("hidden");
+      btnSubmitExperience.disabled = true;
+      btnSubmitText.textContent = "Saving to Google Sheets...";
+
+      if (editingRecordId) {
+        // Delete old entry in sheet and add updated one
+        await sendToGoogleSheetBackend({ action: "delete", id: editingRecordId });
+        await sendToGoogleSheetBackend({ action: "create", ...payload });
+        showToast(`Updated interview experience for ${company} in Google Sheets!`);
+      } else {
+        // Direct insertion into Google Sheets ONLY
+        await sendToGoogleSheetBackend({ action: "create", ...payload });
+        showToast(`Saved interview experience for ${company} directly to Google Sheets!`);
+      }
+
+      // Reset submit button state
+      btnSubmitSpinner.classList.add("hidden");
+      btnSubmitExperience.disabled = false;
+      btnSubmitText.textContent = "Submit Interview Experience";
+
+      // Reset form (no row data stored in the HTML form)
+      resetFormState();
+
+      // Switch to search view and fetch directly from Google Sheets
+      showView("search");
+      setTimeout(() => {
+        fetchQuestionsFromGoogleSheet();
+      }, 500);
+    });
+
+    // XSS sanitization helper
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // WhatsApp Share Formatter
+    function shareOnWhatsApp(id) {
+      const record = interviewRecords.find(r => r.id === id);
+      if (!record) return;
+
+      const lines = [
+        `*🎓 Knowledge Hub - Interview Questions*`,
+        `🏢 *Company:* ${record.company}`,
+        `🎯 *Role:* ${record.role} (${record.seniority})`,
+        `📋 *Round:* ${record.round}`,
+        `👤 *Candidate:* ${record.candidate || 'Anonymous'}`,
+        record.interviewer ? `👥 *Interviewer / Panel:* ${record.interviewer}` : '',
+        `📅 *Date:* ${record.date}`,
+        `🏷️ *Topics:* ${(record.topics || []).join(', ')}`,
+        '',
+        `❓ *Recollected Questions:*`,
+        ...(record.questions || []).map((q, idx) => `${idx + 1}. ${q}`),
+        '',
+        `_Shared from Knowledge Hub Interview Portal_`
+      ].filter(line => line !== '');
+
+      const text = lines.join('\n');
+      const shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+
+      copyToClipboard(text);
+      window.open(shareUrl, "_blank");
+      showToast(`Formatted for WhatsApp & copied to clipboard!`);
+    }
+
+    // Copy Questions Text Helper
+    function copyQuestionsText(id) {
+      const record = interviewRecords.find(r => r.id === id);
+      if (!record) return;
+
+      const text = `${record.company} - ${record.role} (${record.round})\n` +
+        `Candidate: ${record.candidate || 'Anonymous'}\n\n` +
+        (record.questions || []).map((q, idx) => `${idx + 1}. ${q}`).join('\n');
+
+      copyToClipboard(text);
+      showToast(`Copied ${(record.questions || []).length} questions to clipboard!`);
+    }
+
+    function copyToClipboard(str) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(str).catch(() => fallbackCopy(str));
+      } else {
+        fallbackCopy(str);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+      } catch (e) {
+        console.error("Copy failed", e);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    // Export Filtered Questions to CSV
+    btnExportCsv.addEventListener("click", () => {
+      const companyVal = searchCompany.value.trim().toLowerCase();
+      const topicVal = searchTopic.value.trim().toLowerCase();
+      const expVal = searchExperience.value;
+
+      const filtered = interviewRecords.filter(item => {
+        const matchCompany = !companyVal || 
+          (item.company && item.company.toLowerCase().includes(companyVal)) || 
+          (item.candidate && item.candidate.toLowerCase().includes(companyVal));
+        const matchTopic = !topicVal || 
+          (item.topics && item.topics.some(t => t.toLowerCase().includes(topicVal))) ||
+          (item.questions && item.questions.some(q => q.toLowerCase().includes(topicVal))) ||
+          (item.role && item.role.toLowerCase().includes(topicVal));
+        const matchExp = !expVal || item.seniority === expVal;
+        return matchCompany && matchTopic && matchExp;
+      });
+
+      if (filtered.length === 0) {
+        showToast("No interview records match the current filter to export.");
+        return;
+      }
+
+      const headers = ["Company", "Role", "Seniority", "Round", "Candidate", "Interviewer", "Date", "Topics", "Questions"];
+      const rows = filtered.map(item => [
+        `"${(item.company || '').replace(/"/g, '""')}"`,
+        `"${(item.role || '').replace(/"/g, '""')}"`,
+        `"${(item.seniority || '').replace(/"/g, '""')}"`,
+        `"${(item.round || '').replace(/"/g, '""')}"`,
+        `"${(item.candidate || '').replace(/"/g, '""')}"`,
+        `"${(item.interviewer || '').replace(/"/g, '""')}"`,
+        `"${(item.date || '').replace(/"/g, '""')}"`,
+        `"${(item.topics || []).join(', ').replace(/"/g, '""')}"`,
+        `"${(item.questions || []).join(' | ').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `knowledge_hub_interview_questions_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${filtered.length} interview records to CSV!`);
+    });
+
+    // Native Print / PDF View
+    btnPrintView.addEventListener("click", () => {
+      window.print();
+    });
+
+    // Initial page load:
+    updateTrashBadge();
+    // Fetch directly from Google Sheets to display on search view
+    fetchQuestionsFromGoogleSheet();
+  </script>
+</body>
+</html>
