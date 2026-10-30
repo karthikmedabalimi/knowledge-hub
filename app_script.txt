@@ -1,0 +1,65 @@
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rows = sheet.getDataRange().getValues();
+  var records = [];
+  
+  // Skip row 0 (headers)
+  for (var i = 1; i < rows.length; i++) {
+    var row = rows[i];
+    if (!row[0]) continue;
+    records.push({
+      id: row[0],
+      date: row[1],
+      candidate: row[2],
+      company: row[3],
+      role: row[4],
+      seniority: row[5],
+      round: row[6],
+      interviewer: row[7],
+      topics: row[8] ? String(row[8]).split(", ") : [],
+      jd: row[9] || "",
+      questions: row[10] ? String(row[10]).split("\n") : []
+    });
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(records))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  var action = data.action || "create";
+  
+  if (action === "create") {
+    var newId = "exp-" + new Date().getTime();
+    sheet.appendRow([
+      newId,
+      data.date,
+      data.candidate,
+      data.company,
+      data.role,
+      data.seniority,
+      data.round,
+      data.interviewer || "",
+      (data.topics || []).join(", "),
+      data.jd || "",
+      (data.questions || []).join("\n"),
+      new Date().toISOString()
+    ]);
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", id: newId }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (action === "delete") {
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] == data.id) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: "deleted" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
